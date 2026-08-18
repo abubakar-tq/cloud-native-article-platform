@@ -1,0 +1,55 @@
+{
+  "name": "node-sequlize-crud",
+  "version": "1.0.0",
+  "description": "a simple orm implementation",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "railway": "chmod +x railway-start.sh && ./railway-start.sh",
+    "dev": "nodemon server.js",
+    "test": "node test/basic.test.js",
+    "test:docker": "docker-compose -f docker-compose.test.yml up --build --abort-on-container-exit",
+    "lint": "eslint . --ext .js",
+    "lint:fix": "eslint . --ext .js --fix",
+    "security:audit": "npm audit",
+    "docker:build": "docker build -t devops-project-app .",
+    "docker:run": "docker-compose up --build"
+  },
+  "keywords": [
+    "orm",
+    "sequelize"
+  ],
+  "author": "ridhanf",
+  "license": "MIT",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.699.0",
+    "@aws-sdk/client-secrets-manager": "^3.699.0",
+    "@aws-sdk/s3-request-presigner": "^3.699.0",
+    "axios": "^1.13.1",
+    "bcryptjs": "^2.4.3",
+    "connect-pg-simple": "^10.0.0",
+    "dotenv": "^17.2.3",
+    "ejs": "^3.1.6",
+    "express": "^4.17.1",
+    "express-session": "^1.18.0",
+    "method-override": "^3.0.0",
+    "morgan": "^1.10.0",
+    "multer": "^2.0.2",
+    "multer-s3": "^3.0.1",
+    "nodemailer": "^7.0.10",
+    "pg": "^8.5.1",
+    "pg-hstore": "^2.3.3",
+    "resend": "^6.4.0",
+    "sanitize-html": "^2.17.0",
+    "sequelize": "^6.5.0",
+    "sequelize-cli": "^6.6.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.25.0",
+    "eslint-plugin-n": "^15.0.0",
+    "eslint-plugin-promise": "^6.0.0",
+    "nodemon": "^3.1.10"
+  }
+}

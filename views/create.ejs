@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevOps Articles - Create</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="/css/app.css" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark app-navbar sticky-top">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="/articles">
+        <i class="fas fa-feather-alt me-2"></i>
+        DevOps Articles
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#primaryNav" aria-controls="primaryNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="primaryNav">
+        <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+          <li class="nav-item">
+            <a class="nav-link" href="/articles">
+              <i class="fas fa-compass me-1"></i>
+              Explore
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/articles/mine">
+              <i class="fas fa-bookmark me-1"></i>
+              My Articles
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="/articles/create">
+              <i class="fas fa-plus me-1"></i>
+              Create
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/health">
+              <i class="fas fa-heartbeat me-1"></i>
+              Health
+            </a>
+          </li>
+        </ul>
+        <% if (currentUser) { %>
+          <div class="d-flex align-items-center gap-3 ms-lg-4 mt-3 mt-lg-0">
+            <span class="text-white-50">
+              <i class="fas fa-user-circle me-1"></i>
+              <%= currentUser.email %>
+            </span>
+            <form method="POST" action="/auth/logout" class="m-0">
+              <button type="submit" class="btn btn-outline-light btn-sm rounded-pill">
+                <i class="fas fa-sign-out-alt me-1"></i>
+                Sign out
+              </button>
+            </form>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </nav>
+
+  <main class="app-shell">
+    <div class="container">
+      <%- include('partials/flash') %>
+
+      <section class="hero-banner mb-5">
+        <h1 class="fw-bold mb-3 d-flex align-items-center gap-3">
+          <i class="fas fa-pen-to-square text-primary"></i>
+          Draft a fresh DevOps story
+        </h1>
+        <p class="text-muted mb-0">
+          Share the wins, lessons, and tooling insights you wish someone told you sooner. Rich media, documents, and video embeds are welcome.
+        </p>
+      </section>
+
+      <section class="form-wrapper">
+        <form method="POST" action="/articles" enctype="multipart/form-data" id="articleForm">
+          <div class="row g-4">
+            <div class="col-lg-8">
+              <div class="mb-4">
+                <label for="title" class="form-label">
+                  <i class="fas fa-heading me-2 text-primary"></i>
+                  Headline
+                </label>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="title"
+                  name="title"
+                  placeholder="A short, captivating title"
+                  value="<%= title || '' %>"
+                  required
+                >
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label">
+                  <i class="fas fa-align-left me-2 text-primary"></i>
+                  Body
+                </label>
+                <div class="form-text mb-2">
+                  Format using the toolbar, or paste formatted text. Headings and bold styles make content scan-friendly.
+                </div>
+                <div id="editor" style="height: 360px;"><%- body || '' %></div>
+                <input type="hidden" name="body" id="body">
+              </div>
+            </div>
+
+            <div class="col-lg-4">
+              <div class="mb-4">
+                <label for="images" class="form-label d-flex justify-content-between align-items-center">
+                  <span>
+                    <i class="fas fa-images me-2 text-secondary"></i>
+                    Image gallery
+                  </span>
+                  <span class="badge-soft bg-primary-subtle text-primary">PNG, JPG, GIF</span>
+                </label>
+                <input
+                  class="form-control"
+                  type="file"
+                  id="images"
+                  name="images"
+                  accept="image/*"
+                  multiple
+                >
+                <div class="form-text">
+                  Upload up to 10 images to visualise your article.
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label for="documents" class="form-label d-flex justify-content-between align-items-center">
+                  <span>
+                    <i class="fas fa-file-alt me-2 text-secondary"></i>
+                    Supporting documents
+                  </span>
+                  <span class="badge-soft bg-secondary-subtle text-secondary">PDF, DOCX</span>
+                </label>
+                <input
+                  class="form-control"
+                  type="file"
+                  id="documents"
+                  name="documents"
+                  accept=".pdf,.doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  multiple
+                >
+                <div class="form-text">
+                  Attach reference material for download (Word or PDF, max 5 files).
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                  <label class="form-label mb-0">
+                    <i class="fas fa-link me-2 text-secondary"></i>
+                    Video embeds
+                  </label>
+                  <button type="button" class="btn btn-outline-pill btn-sm" id="addVideoLinkBtn">
+                    <i class="fas fa-plus me-1"></i>
+                    Add link
+                  </button>
+                </div>
+                <div id="videoLinksContainer" class="d-flex flex-column gap-2 mt-2">
+                  <input
+                    type="url"
+                    name="videoLinks"
+                    class="form-control"
+                    placeholder="https://youtu.be/..."
+                  >
+                </div>
+                <div class="form-text">
+                  Provide public YouTube or Google Drive URLs to embed them beautifully.
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <label class="form-label">
+                  <i class="fas fa-eye me-2 text-primary"></i>
+                  Visibility
+                </label>
+                <div class="alert-soft p-3">
+                  Choose whether this article stays private or appears on the global feed.
+                </div>
+                <div class="form-check mb-2">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="visibility"
+                    id="visibilityPrivate"
+                    value="private"
+                    <%= selectedVisibility === 'private' ? 'checked' : '' %>
+                  >
+                  <label class="form-check-label" for="visibilityPrivate">
+                    <i class="fas fa-lock me-1 text-secondary"></i>
+                    Keep it private for now
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input
+                    class="form-check-input"
+                    type="radio"
+                    name="visibility"
+                    id="visibilityPublic"
+                    value="public"
+                    <%= selectedVisibility === 'public' ? 'checked' : '' %>
+                  >
+                  <label class="form-check-label" for="visibilityPublic">
+                    <i class="fas fa-globe me-1 text-success"></i>
+                    Publish to everyone
+                  </label>
+                </div>
+              </div>
+
+              <div class="mb-4">
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" name="approved" id="approved" value="true"
+                    <%= approved ? 'checked' : '' %>
+                  >
+                  <label class="form-check-label" for="approved">
+                    <strong>Publish immediately</strong>
+                    <span class="d-block text-muted small">Skip review and make the article public as soon as you save it.</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between flex-wrap gap-3 pt-4 border-top mt-4">
+            <a href="/articles" class="btn btn-outline-pill">
+              <i class="fas fa-arrow-left"></i>
+              Cancel
+            </a>
+            <button type="submit" class="btn btn-primary-pill btn-pill">
+              <i class="fas fa-save"></i>
+              Create article
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+  <script>
+    const quill = new Quill('#editor', {
+      theme: 'snow',
+      placeholder: 'Share the problem, approach, and outcome...',
+      modules: {
+        toolbar: [
+          [{ header: [1, 2, 3, false] }],
+          ['bold', 'italic', 'underline', 'strike'],
+          [{ list: 'ordered' }, { list: 'bullet' }],
+          ['blockquote', 'code-block'],
+          ['link', 'image', 'video'],
+          ['clean']
+        ]
+      }
+    })
+
+    const articleForm = document.getElementById('articleForm')
+    articleForm.addEventListener('submit', function() {
+      const hiddenBodyInput = document.getElementById('body')
+      hiddenBodyInput.value = quill.root.innerHTML
+
+      const submitBtn = this.querySelector('button[type="submit"]')
+      submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating...'
+      submitBtn.disabled = true
+    })
+
+    const addVideoLinkBtn = document.getElementById('addVideoLinkBtn')
+    const videoLinksContainer = document.getElementById('videoLinksContainer')
+
+    addVideoLinkBtn.addEventListener('click', () => {
+      const input = document.createElement('input')
+      input.type = 'url'
+      input.name = 'videoLinks'
+      input.className = 'form-control'
+      input.placeholder = 'https://youtu.be/...'
+      videoLinksContainer.appendChild(input)
+    })
+  </script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+{
+  "development": {
+    "username": "${DB_USERNAME}",
+    "password": "${DB_PASSWORD}",
+    "database": "${DB_NAME}",
+    "host": "${DB_HOST}",
+    "port": "${DB_PORT}",
+    "dialect": "postgres",
+    "dialectOptions": {
+      "connectTimeout": 60000,
+      "ssl": false
+    }
+  },
+  "test": {
+    "username": "${TEST_DB_USERNAME}",
+    "password": "${TEST_DB_PASSWORD}",
+    "database": "${TEST_DB_NAME}",
+    "host": "${TEST_DB_HOST}",
+    "port": "${TEST_DB_PORT}",
+    "dialect": "postgres",
+    "dialectOptions": {
+      "connectTimeout": 60000,
+      "ssl": false
+    }
+  },
+  "docker": {
+    "username": "${DB_USERNAME}",
+    "password": "${DB_PASSWORD}",
+    "database": "${DB_NAME}",
+    "host": "${DB_HOST}",
+    "port": "${DB_PORT}",
+    "dialect": "postgres",
+    "dialectOptions": {
+      "connectTimeout": 60000,
+      "ssl": false
+    }
+  },
+  "production": {
+    "use_env_variable": "DATABASE_URL",
+    "dialect": "postgres",
+    "dialectOptions": {
+      "ssl": {
+        "require": true,
+        "rejectUnauthorized": false
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+<% if (typeof flash !== 'undefined' && flash) { %>
+  <% 
+    const variants = {
+      success: 'success',
+      danger: 'danger',
+      warning: 'warning',
+      info: 'info'
+    }
+    const variant = variants[flash.type] || 'secondary'
+  %>
+  <div class="alert alert-<%= variant %> alert-dismissible fade show mt-3" role="alert">
+    <%= flash.message %>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+<% } %>

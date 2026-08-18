@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevOps Articles - <%= title || 'Article' %></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="/css/app.css" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark app-navbar">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center" href="/articles">
+        <i class="fas fa-feather-alt me-2"></i>
+        DevOps Articles
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#primaryNav" aria-controls="primaryNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="primaryNav">
+        <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+          <li class="nav-item">
+            <a class="nav-link" href="/articles">
+              <i class="fas fa-list me-1"></i>
+              All Articles
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/articles/mine">
+              <i class="fas fa-user-edit me-1"></i>
+              My Articles
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/articles/create">
+              <i class="fas fa-plus me-1"></i>
+              Create Article
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/health">
+              <i class="fas fa-heartbeat me-1"></i>
+              Health
+            </a>
+          </li>
+        </ul>
+        <% if (currentUser) { %>
+          <div class="d-flex align-items-center gap-3 ms-lg-4 mt-3 mt-lg-0">
+            <% if (currentUser.isAdmin) { %>
+              <a href="/admin" class="btn btn-warning btn-sm rounded-pill me-2">
+                <i class="fas fa-shield-alt me-1"></i>
+                Admin Panel
+              </a>
+            <% } %>
+            <span class="text-white-50">
+              <i class="fas fa-user-circle me-1"></i>
+              <%= currentUser.email %>
+            </span>
+            <form method="POST" action="/auth/logout" class="m-0">
+              <button type="submit" class="btn btn-outline-light btn-sm rounded-pill">
+                <i class="fas fa-sign-out-alt me-1"></i>
+                Sign out
+              </button>
+            </form>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </nav>
+
+  <main class="app-shell">
+    <div class="container">
+      <%- include('partials/flash') %>
+
+      <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb bg-transparent px-0 mb-0">
+          <li class="breadcrumb-item">
+            <a href="/articles" class="text-decoration-none">
+              <i class="fas fa-home me-1"></i>
+              Articles
+            </a>
+          </li>
+          <li class="breadcrumb-item active text-dark" aria-current="page">
+            <%= title || 'Article Details' %>
+          </li>
+        </ol>
+      </nav>
+
+      <% const mediaItems = Array.isArray(media) ? media : [] %>
+      <% const imageMedia = mediaItems.filter(item => item.type === 'image') %>
+      <% const documentMedia = mediaItems.filter(item => item.type === 'document') %>
+      <% const videoMedia = mediaItems.filter(item => item.type === 'video') %>
+
+      <article class="app-card article-container">
+        <header class="app-card-header">
+          <h1 class="display-5 fw-bold d-flex align-items-center gap-3 mb-3">
+            <i class="fas fa-file-pen text-white bg-primary rounded-circle p-3"></i>
+            <span><%= title || 'Untitled Article' %></span>
+          </h1>
+          <div class="article-header-meta">
+            <span class="d-flex align-items-center gap-2">
+              <i class="fas fa-calendar-day text-white bg-primary rounded-circle p-2"></i>
+              <span>
+                <strong>Created:</strong>
+                <%= new Date(createdAt).toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                }) %>
+              </span>
+            </span>
+            <span class="d-flex align-items-center gap-2">
+              <i class="fas fa-clock text-white bg-secondary rounded-circle p-2"></i>
+              <span>
+                <strong>Read time:</strong>
+                <%= Math.max(1, Math.ceil((body || '').split(' ').length / 200)) %> min
+              </span>
+            </span>
+            <% if (owner) { %>
+              <span class="d-flex align-items-center gap-2">
+                <i class="fas fa-user text-white bg-secondary rounded-circle p-2"></i>
+                <span>
+                  <strong>Author:</strong>
+                  <%= owner.email %>
+                </span>
+              </span>
+            <% } %>
+            <span class="status-badge <%= visibility === 'public' ? 'bg-primary-subtle text-primary' : 'bg-secondary-subtle text-secondary' %>">
+              <i class="fas <%= visibility === 'public' ? 'fa-globe-americas' : 'fa-lock' %>"></i>
+              <%= visibility === 'public' ? 'Public' : 'Private' %>
+            </span>
+            <% if (approved) { %>
+              <span class="status-badge bg-success-subtle text-success">
+                <i class="fas fa-circle-check"></i>
+                Published
+              </span>
+            <% } else { %>
+              <span class="status-badge bg-warning-subtle text-warning">
+                <i class="fas fa-hourglass-half"></i>
+                Draft
+              </span>
+            <% } %>
+          </div>
+        </header>
+
+        <section class="app-card-body article-body">
+          <% if (visibility === 'private') { %>
+            <div class="alert alert-soft d-flex align-items-center gap-2 mb-4">
+              <i class="fas fa-lock"></i>
+              <span>This article is private and visible only to you.</span>
+            </div>
+          <% } %>
+
+          <% if (body && body.trim()) { %>
+            <div class="article-content">
+              <%- body %>
+            </div>
+          <% } else { %>
+            <div class="text-center text-muted py-5">
+              <i class="fas fa-file-circle-question fa-3x mb-3 opacity-50"></i>
+              <h3>No Content Yet</h3>
+              <p>This article is waiting for its story.</p>
+            </div>
+          <% } %>
+
+          <% if (documentMedia.length > 0) { %>
+            <section class="document-section mt-5">
+              <div class="section-heading">
+                <div>
+                  <h2 class="h4 fw-bold mb-2 d-flex align-items-center gap-2">
+                    <i class="fas fa-paperclip text-primary"></i>
+                    Supporting Documents
+                  </h2>
+                  <p>Preview, download, or open the resources that accompany this article.</p>
+                </div>
+                <span class="badge rounded-pill bg-primary-subtle text-primary fw-semibold px-3 py-2">
+                  <i class="fas fa-layer-group me-1"></i>
+                  <%= documentMedia.length %> file<%= documentMedia.length > 1 ? 's' : '' %>
+                </span>
+              </div>
+              <div class="row g-4">
+                <% documentMedia.forEach((item) => { %>
+                  <% const documentUrl = `/${item.storagePath}` %>
+                  <% const safeTitle = item.title || 'Document' %>
+                  <% const lowerPath = (item.storagePath || '').toLowerCase() %>
+                  <% const isPdf = lowerPath.endsWith('.pdf') %>
+                  <% const isWord = lowerPath.endsWith('.doc') || lowerPath.endsWith('.docx') %>
+                  <% const extension = (safeTitle.includes('.') ? safeTitle.split('.').pop() : (lowerPath.includes('.') ? lowerPath.split('.').pop() : '')).toUpperCase() || 'FILE' %>
+                  <% const iconClass = isPdf ? 'fa-file-pdf' : (isWord ? 'fa-file-word' : 'fa-file-lines') %>
+                  <% const iconStyle = isPdf
+                    ? 'background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);'
+                    : (isWord ? 'background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);' : 'background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);') %>
+                  <% const chipClass = isPdf
+                    ? 'bg-danger-subtle text-danger'
+                    : (isWord ? 'bg-primary-subtle text-primary' : 'bg-secondary-subtle text-secondary') %>
+                  <div class="col-12 col-xl-6">
+                    <div class="document-card h-100">
+                      <div class="document-card-header w-100">
+                        <div class="document-icon" style="<%= iconStyle %>">
+                          <i class="fas <%= iconClass %>"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                          <h3 class="h5 mb-1"><%= safeTitle %></h3>
+                          <div class="document-meta">
+                            <span class="document-type-chip <%= chipClass %>"><%= extension %></span>
+                            <span>
+                              <i class="fas fa-calendar-alt me-1"></i>
+                              Uploaded <%= new Date(item.createdAt).toLocaleString() %>
+                            </span>
+                          </div>
+                        </div>
+                        <div class="document-actions">
+                          <a href="<%= documentUrl %>" class="document-download-btn" download>
+                            <i class="fas fa-download"></i>
+                            Download
+                          </a>
+                          <a href="<%= documentUrl %>" class="btn btn-outline-pill btn-sm" target="_blank" rel="noopener">
+                            <i class="fas fa-external-link-alt"></i>
+                          </a>
+                        </div>
+                      </div>
+
+                      <% if (isPdf) { %>
+                        <div class="document-preview ratio ratio-4x3">
+                          <iframe
+                            src="<%= documentUrl %>#toolbar=0&navpanes=0"
+                            title="<%= safeTitle %>"
+                            loading="lazy"
+                            allowfullscreen
+                          ></iframe>
+                        </div>
+                      <% } else { %>
+                        <div class="document-preview document-preview-placeholder">
+                          <i class="fas fa-file-lines"></i>
+                          <p class="mb-0">
+                            Preview not available for this file type.<br>
+                            Use the buttons above to open or download.
+                          </p>
+                        </div>
+                      <% } %>
+                    </div>
+                  </div>
+                <% }) %>
+              </div>
+            </section>
+          <% } %>
+
+          <% if (imageMedia.length > 0) { %>
+            <section class="mt-5">
+              <h2 class="h4 fw-bold mb-3 d-flex align-items-center gap-2">
+                <i class="fas fa-camera-retro text-secondary"></i>
+                Photo Gallery
+              </h2>
+              <div class="media-gallery">
+                <% imageMedia.forEach((item) => { %>
+                  <figure class="media-card">
+                    <img src="/<%= item.storagePath %>" alt="<%= item.title || 'Article image' %>">
+                    <figcaption class="mt-2 small text-muted">
+                      <i class="fas fa-image me-1"></i>
+                      <%= item.title || 'Image' %>
+                    </figcaption>
+                  </figure>
+                <% }) %>
+              </div>
+            </section>
+          <% } %>
+
+          <% if (videoMedia.length > 0) { %>
+            <section class="video-section">
+              <h2 class="h4 fw-bold mb-3 text-center d-flex justify-content-center align-items-center gap-2">
+                <i class="fas fa-video text-primary"></i>
+                Featured Videos
+              </h2>
+              <div class="video-grid">
+                <% videoMedia.forEach((item, index) => { %>
+                  <div class="video-card">
+                    <button class="video-embed play-video" type="button" data-video="<%= item.embedUrl || item.externalUrl %>" aria-label="Play video <%= index + 1 %>">
+                      <div class="video-embed-thumbnail">
+                        <i class="fas fa-play-circle"></i>
+                        <span>Play video</span>
+                      </div>
+                    </button>
+                    <small class="text-muted d-block text-center" style="word-break: break-all;">
+                      <i class="fas fa-link me-1"></i>
+                      <a href="<%= item.externalUrl %>" target="_blank" rel="noopener">
+                        View on original platform
+                      </a>
+                    </small>
+                  </div>
+                <% }) %>
+              </div>
+            </section>
+          <% } %>
+        </section>
+
+        <footer class="app-card-footer d-flex flex-wrap justify-content-between align-items-center gap-3">
+          <div class="d-flex flex-wrap gap-2">
+            <% if (visibility === 'private') { %>
+              <a href="/articles/mine" class="btn btn-secondary-pill btn-pill">
+                <i class="fas fa-user-lock"></i>
+                My Articles
+              </a>
+            <% } %>
+            <a href="/articles" class="btn btn-outline-pill">
+              <i class="fas fa-arrow-left"></i>
+              Back to Articles
+            </a>
+            <% if (isOwner) { %>
+              <a href="/articles/update/<%= id %>" class="btn btn-warning-pill btn-pill">
+                <i class="fas fa-pen-to-square"></i>
+                Edit Article
+              </a>
+            <% } else { %>
+              <a href="/complaints/new?type=article&id=<%= id %>" class="btn btn-outline-danger btn-pill">
+                <i class="fas fa-flag"></i>
+                Report Article
+              </a>
+            <% } %>
+          </div>
+          <% if (isOwner) { %>
+            <form method="POST" action="/articles/<%= id %>?_method=DELETE" class="m-0">
+              <button type="submit" class="btn btn-danger-pill btn-pill"
+                onclick="return confirm('Delete this article permanently? This action cannot be undone.')">
+                <i class="fas fa-trash-alt"></i>
+                Delete
+              </button>
+            </form>
+          <% } %>
+        </footer>
+      </article>
+    </div>
+  </main>
+
+  <div class="video-modal-backdrop" id="videoModal" aria-hidden="true">
+    <div class="video-modal" role="dialog" aria-modal="true" aria-label="Video player">
+      <button class="video-modal-close" type="button" aria-label="Close video" id="videoModalClose">
+        <i class="fas fa-times"></i>
+      </button>
+      <iframe id="videoModalFrame" src="" allowfullscreen allow="autoplay"></iframe>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const videoButtons = document.querySelectorAll('.play-video')
+    const modal = document.getElementById('videoModal')
+    const modalFrame = document.getElementById('videoModalFrame')
+    const modalClose = document.getElementById('videoModalClose')
+
+    const closeModal = () => {
+      modal.classList.remove('active')
+      modal.setAttribute('aria-hidden', 'true')
+      modalFrame.src = ''
+      document.body.style.overflow = ''
+    }
+
+    videoButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const src = button.getAttribute('data-video')
+        modalFrame.src = src
+        modal.classList.add('active')
+        modal.setAttribute('aria-hidden', 'false')
+        document.body.style.overflow = 'hidden'
+      })
+    })
+
+    modalClose.addEventListener('click', closeModal)
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) {
+        closeModal()
+      }
+    })
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && modal.classList.contains('active')) {
+        closeModal()
+      }
+    })
+  </script>
+</body>
+</html>
