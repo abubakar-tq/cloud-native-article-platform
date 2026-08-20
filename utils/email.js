@@ -51,6 +51,7 @@ const sendMail = async(options) => {
     console.log(`   To: ${options.to}`)
     console.log(`   From: ${emailFrom}`)
     console.log(`   Subject: ${options.subject}`)
+    console.log(options.text)
     console.log('---')
 
     return {
