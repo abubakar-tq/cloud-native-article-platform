@@ -52,7 +52,7 @@ const sendVerificationEmail = async(email, otp) => {
             '• Never share this code with anyone',
             '• We will never ask for this code over phone or email',
             '',
-            `If you did not request this code, please ignore this email or contact support.`,
+            'If you did not request this code, please ignore this email or contact support.',
             '',
             `Visit: ${appUrl}`,
             '',
@@ -753,10 +753,10 @@ router.post('/admin/login', redirectIfAuthenticated, asyncHandler(async(req, res
 router.get('/test-otp-email', asyncHandler(async(req, res) => {
     const testEmail = req.query.email || 'test@example.com'
     const testOtp = crypto.randomInt(100000, 999999).toString()
-    
+
     try {
         await sendVerificationEmail(testEmail, testOtp)
-        
+
         res.json({
             success: true,
             message: `OTP verification email sent successfully to ${testEmail}`,
@@ -769,7 +769,7 @@ router.get('/test-otp-email', asyncHandler(async(req, res) => {
         })
     } catch (error) {
         console.error('Failed to send OTP email:', error.message)
-        
+
         res.json({
             success: false,
             message: `Failed to send OTP email: ${error.message}`,
@@ -785,7 +785,7 @@ router.get('/test-otp-email', asyncHandler(async(req, res) => {
 // Test email endpoint for development/testing
 router.get('/test-email', asyncHandler(async(req, res) => {
     const testEmail = req.query.email || 'test@example.com'
-    
+
     try {
         await sendMail({
             to: testEmail,
@@ -815,7 +815,7 @@ router.get('/test-email', asyncHandler(async(req, res) => {
                 `<p><small>Test sent at: ${new Date().toISOString()}</small></p>`
             ].join('')
         })
-        
+
         res.json({
             success: true,
             message: `Test email sent successfully to ${testEmail}`,
@@ -845,16 +845,16 @@ router.get('/test-postal-connection', asyncHandler(async(req, res) => {
         // Test 1: Check if we can reach the Postal server
         const axios = require('axios')
         const testUrl = `https://${process.env.POSTAL_SERVER || 'postal.mailsytems.live'}/api/v1/servers`
-        
+
         console.log(`Testing connection to: ${testUrl}`)
-        
+
         const response = await axios.get(testUrl, {
             headers: {
                 'X-Server-API-Key': process.env.POSTAL_API_KEY || 'test'
             },
             timeout: 10000
         })
-        
+
         res.json({
             success: true,
             message: 'Successfully connected to Postal server!',
@@ -863,12 +863,12 @@ router.get('/test-postal-connection', asyncHandler(async(req, res) => {
                 server: process.env.POSTAL_SERVER || 'Not configured',
                 from: process.env.EMAIL_FROM || 'Not configured',
                 apiKeyConfigured: !!process.env.POSTAL_API_KEY,
-                testUrl: testUrl
+                testUrl
             }
         })
     } catch (error) {
         console.error('Postal connection test failed:', error.message)
-        
+
         res.json({
             success: false,
             message: `Connection test failed: ${error.message}`,

@@ -1,7 +1,5 @@
 'use strict'
 
-const fs = require('fs')
-const path = require('path')
 const express = require('express')
 const sanitizeHtml = require('sanitize-html')
 const { Article, ArticleMedia, User, Sequelize } = require('../models')
@@ -259,15 +257,15 @@ router.get('/', asyncHandler(async(req, res) => {
             if (media.type === 'video') {
                 return { ...media, embedUrl: buildEmbeddableUrl(media.externalUrl) }
             }
-            
+
             if (media.storagePath) {
                 const signedUrl = await getS3SignedUrl(media.storagePath)
                 return { ...media, url: signedUrl }
             }
-            
+
             return media
         }))
-        
+
         return { ...articlePlain, media: mediaWithUrls }
     }))
 
@@ -319,15 +317,15 @@ router.get('/mine', asyncHandler(async(req, res) => {
                 if (media.type === 'video') {
                     return { ...media, embedUrl: buildEmbeddableUrl(media.externalUrl) }
                 }
-                
+
                 if (media.storagePath) {
                     const signedUrl = await getS3SignedUrl(media.storagePath)
                     return { ...media, url: signedUrl }
                 }
-                
+
                 return media
             }))
-            
+
             return { ...articlePlain, media: mediaWithUrls }
         }))
     }
@@ -418,18 +416,18 @@ router.get('/:id', asyncHandler(async(req, res, next) => {
     }
 
     const articlePlain = article.get({ plain: true })
-    
+
     // Generate signed URLs for S3 media
     const mediaWithUrls = await Promise.all((articlePlain.media || []).map(async(media) => {
         if (media.type === 'video') {
             return { ...media, embedUrl: buildEmbeddableUrl(media.externalUrl) }
         }
-        
+
         if (media.storagePath) {
             const signedUrl = await getS3SignedUrl(media.storagePath)
             return { ...media, url: signedUrl }
         }
-        
+
         return media
     }))
 

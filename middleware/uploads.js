@@ -3,7 +3,6 @@
 const multer = require('multer')
 const multerS3 = require('multer-s3')
 const { S3Client } = require('@aws-sdk/client-s3')
-const path = require('path')
 
 // Initialize S3 client (will use IAM role in EKS)
 // AWS_ENDPOINT_URL is only set for local dev against LocalStack; real AWS ignores it.

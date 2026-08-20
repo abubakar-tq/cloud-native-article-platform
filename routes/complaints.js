@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const { requireAuth } = require('../middleware/auth')
-const { Complaint, User, Article } = require('../models')
+const { Complaint } = require('../models')
 const asyncHandler = require('../utils/asyncHandler')
 const { setFlash } = require('../middleware/flash')
 

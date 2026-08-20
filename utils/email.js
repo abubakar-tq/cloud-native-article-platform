@@ -20,7 +20,7 @@ const sendMail = async(options) => {
         try {
             console.log('📧 Sending email via Resend API...')
             const resend = new Resend(process.env.RESEND_API_KEY)
-            
+
             const emailData = {
                 from: emailFrom,
                 to: options.to,
