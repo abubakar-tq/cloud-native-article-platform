@@ -6,8 +6,13 @@ const { S3Client } = require('@aws-sdk/client-s3')
 const path = require('path')
 
 // Initialize S3 client (will use IAM role in EKS)
+// AWS_ENDPOINT_URL is only set for local dev against LocalStack; real AWS ignores it.
 const s3Client = new S3Client({
-    region: process.env.AWS_REGION || 'us-east-1'
+    region: process.env.AWS_REGION || 'us-east-1',
+    ...(process.env.AWS_ENDPOINT_URL && {
+        endpoint: process.env.AWS_ENDPOINT_URL,
+        forcePathStyle: true
+    })
 })
 
 const S3_BUCKET = process.env.S3_UPLOADS_BUCKET || 'devops-articles-uploads'

@@ -1,0 +1,88 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-Abubakar}
+      POSTGRES_DB: ${DB_NAME:-postgres_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_NAME:-postgres_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: ${PORT:-3000}
+      SESSION_SECRET: ${SESSION_SECRET}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-Abubakar}
+      DB_NAME: ${DB_NAME:-postgres_db}
+      DB_SSL: "false"
+      DATABASE_URL: postgresql://${DB_USERNAME:-postgres}:${DB_PASSWORD:-Abubakar}@db:5432/${DB_NAME:-postgres_db}
+      RESEND_API_KEY: ${RESEND_API_KEY}
+      EMAIL_FROM: ${EMAIL_FROM:-DevOps Articles <noreply@example.me>}
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      AWS_REGION: ${AWS_REGION:-us-east-1}
+      S3_UPLOADS_BUCKET: ${S3_UPLOADS_BUCKET:-devops-articles-uploads}
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_ENDPOINT_URL: http://localstack:4566
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "healthcheck.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack
+    environment:
+      LOCALSTACK_AUTH_TOKEN: ${LOCALSTACK_AUTH_TOKEN}
+      SERVICES: s3
+      S3_UPLOADS_BUCKET: ${S3_UPLOADS_BUCKET:-devops-articles-uploads}
+    ports:
+      - "4566:4566"
+    volumes:
+      - ./localstack/init:/etc/localstack/init/ready.d
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge
