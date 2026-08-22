@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+    tls = {
+      source  = "hashicorp/tls"
+      version = "~> 4.0"
+    }
   }
 }
 
@@ -27,5 +31,6 @@ provider "aws" {
     ec2 = "http://localhost:4566"
     iam = "http://localhost:4566"
     eks = "http://localhost:4566"
+    sts = "http://localhost:4566"
   }
 }

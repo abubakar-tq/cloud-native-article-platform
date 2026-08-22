@@ -45,3 +45,15 @@ variable "eks_min_capacity" {
   type        = number
   default     = 1
 }
+
+variable "app_namespace" {
+  description = "Kubernetes namespace the app's pods run in (must match the actual manifests)"
+  type        = string
+  default     = "article-platform"
+}
+
+variable "app_service_account" {
+  description = "Kubernetes ServiceAccount name the app's pods use (must match the actual manifests)"
+  type        = string
+  default     = "app-sa"
+}
