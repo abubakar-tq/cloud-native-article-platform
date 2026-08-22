@@ -15,3 +15,33 @@ variable "availability_zones" {
   type        = list(string)
   default     = ["us-east-1a", "us-east-1b"]
 }
+
+variable "eks_cluster_version" {
+  description = "Kubernetes version for the EKS control plane"
+  type        = string
+  default     = "1.30"
+}
+
+variable "eks_node_instance_types" {
+  description = "EC2 instance types for the EKS managed node group"
+  type        = list(string)
+  default     = ["t3.medium"]
+}
+
+variable "eks_desired_capacity" {
+  description = "Desired number of worker nodes"
+  type        = number
+  default     = 2
+}
+
+variable "eks_max_capacity" {
+  description = "Maximum number of worker nodes"
+  type        = number
+  default     = 3
+}
+
+variable "eks_min_capacity" {
+  description = "Minimum number of worker nodes"
+  type        = number
+  default     = 1
+}

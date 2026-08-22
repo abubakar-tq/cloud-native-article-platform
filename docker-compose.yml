@@ -63,12 +63,15 @@ services:
     container_name: localstack
     environment:
       LOCALSTACK_AUTH_TOKEN: ${LOCALSTACK_AUTH_TOKEN}
-      SERVICES: s3,ec2,iam
+      SERVICES: s3,ec2,iam,eks
       S3_UPLOADS_BUCKET: ${S3_UPLOADS_BUCKET:-devops-articles-uploads}
+      DOCKER_HOST: unix:///var/run/docker.sock
     ports:
       - "4566:4566"
+      - "4510-4559:4510-4559"
     volumes:
       - ./localstack/init:/etc/localstack/init/ready.d
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - app-network
     restart: unless-stopped
