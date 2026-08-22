@@ -63,7 +63,7 @@ services:
     container_name: localstack
     environment:
       LOCALSTACK_AUTH_TOKEN: ${LOCALSTACK_AUTH_TOKEN}
-      SERVICES: s3
+      SERVICES: s3,ec2
       S3_UPLOADS_BUCKET: ${S3_UPLOADS_BUCKET:-devops-articles-uploads}
     ports:
       - "4566:4566"
