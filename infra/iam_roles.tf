@@ -1,7 +1,7 @@
 resource "aws_iam_role" "eks_cluster" {
   name_prefix = "${var.project_name}-eks-cluster-role-"
 
-    assume_role_policy = jsonencode({
+  assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
       Action = "sts:AssumeRole"
@@ -15,7 +15,6 @@ resource "aws_iam_role" "eks_cluster" {
   tags = {
     Name = "${var.project_name}-eks-cluster-role"
   }
-
 }
 
 resource "aws_iam_role_policy_attachment" "eks_cluster_policy" {

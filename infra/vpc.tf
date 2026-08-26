@@ -1,5 +1,5 @@
 resource "aws_vpc" "main" {
-  cidr_block= var.vpc_cidr
+  cidr_block           = var.vpc_cidr
   enable_dns_hostnames = true
   enable_dns_support   = true
 
@@ -31,7 +31,6 @@ resource "aws_subnet" "public" {
   }
 }
 
-
 resource "aws_subnet" "private" {
   count             = length(var.availability_zones)
   vpc_id            = aws_vpc.main.id
@@ -46,26 +45,26 @@ resource "aws_subnet" "private" {
 }
 
 resource "aws_route_table" "public" {
- vpc_id = aws_vpc.main.id
+  vpc_id = aws_vpc.main.id
 
- route {
+  route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.main.id
- }
+  }
 
- tags = {
-   Name = "${var.project_name}-public-rt"
- }
+  tags = {
+    Name = "${var.project_name}-public-rt"
+  }
 }
 
 resource "aws_route_table_association" "public" {
-  count = length(var.availability_zones)
+  count          = length(var.availability_zones)
   route_table_id = aws_route_table.public.id
-  subnet_id = aws_subnet.public[count.index].id
+  subnet_id      = aws_subnet.public[count.index].id
 }
 
 resource "aws_eip" "nat" {
-  count  = length(var.availability_zones)
+  count = length(var.availability_zones)
   tags = {
     Name = "${var.project_name}-nat-eip-${count.index + 1}"
   }
@@ -74,26 +73,24 @@ resource "aws_eip" "nat" {
 }
 
 resource "aws_nat_gateway" "main" {
-    count = length(var.availability_zones)
-    allocation_id = aws_eip.nat[count.index].id
-    subnet_id = aws_subnet.public[count.index].id
+  count         = length(var.availability_zones)
+  allocation_id = aws_eip.nat[count.index].id
+  subnet_id     = aws_subnet.public[count.index].id
 
-    tags = {
-       Name = "${var.project_name}-nat-gateway-${count.index + 1}"
-    }
+  tags = {
+    Name = "${var.project_name}-nat-gateway-${count.index + 1}"
+  }
 
-    depends_on = [aws_internet_gateway.main]
-  
+  depends_on = [aws_internet_gateway.main]
 }
 
 resource "aws_route_table" "private" {
   count  = length(var.availability_zones)
   vpc_id = aws_vpc.main.id
 
-
   route {
-      cidr_block     = "0.0.0.0/0"
-      nat_gateway_id = aws_nat_gateway.main[count.index].id
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.main[count.index].id
   }
 
   tags = {
@@ -102,9 +99,7 @@ resource "aws_route_table" "private" {
 }
 
 resource "aws_route_table_association" "private" {
-  
-  count = length(var.availability_zones)
+  count          = length(var.availability_zones)
   route_table_id = aws_route_table.private[count.index].id
-  subnet_id = aws_subnet.private[count.index].id
-  
+  subnet_id      = aws_subnet.private[count.index].id
 }
