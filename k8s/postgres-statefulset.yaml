@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: article-platform
+spec:
+  serviceName: postgres
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: postgres
+
+  template:
+    metadata:
+      labels:
+        app: postgres
+
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+
+          env:
+            # Renamed via individual refs, not envFrom - the postgres image expects
+            # POSTGRES_* names, while our ConfigMap/Secret use the app's own DB_* names.
+            - name: POSTGRES_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: article-platform-config
+                  key: DB_USERNAME
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: article-platform-config
+                  key: DB_NAME
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: article-platform-secrets
+                  key: DB_PASSWORD
+
+          ports:
+            - containerPort: 5432
+
+          volumeMounts:
+            - name: postgres-storage
+              mountPath: /var/lib/postgresql/data
+
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-storage
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Gi
