@@ -31,6 +31,7 @@ pipeline {
                 withCredentials([file(credentialsId: 'k8s-secret-yaml', variable: 'SECRET_FILE')]) {
                     sh 'cp -f $SECRET_FILE k8s/secret.yaml'
                 }
+                sh 'kubectl --kubeconfig ./kubeconfig apply -f k8s/namespace.yaml'
                 sh 'kubectl --kubeconfig ./kubeconfig apply -f k8s/'
             }
         }
