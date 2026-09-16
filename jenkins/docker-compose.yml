@@ -1,8 +1,10 @@
 services:
  jenkins:
-  build: 
+  build:
    context: .
    dockerfile: Dockerfile
+   args:
+    DOCKER_GID: "1001"
   ports:
    - "8080:8080"
   volumes:

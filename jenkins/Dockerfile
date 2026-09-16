@@ -52,4 +52,17 @@ RUN terraform version && \
     docker --version && \
     docker compose version
 
+# ============================================================
+# Docker socket access for the jenkins user
+# ============================================================
+
+ARG DOCKER_GID=1001
+RUN existing_group=$(getent group ${DOCKER_GID} | cut -d: -f1); \
+    if [ -z "$existing_group" ]; then \
+        groupadd -g ${DOCKER_GID} docker; \
+        usermod -aG docker jenkins; \
+    else \
+        usermod -aG "$existing_group" jenkins; \
+    fi
+
 USER jenkins
