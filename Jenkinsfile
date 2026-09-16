@@ -2,6 +2,7 @@ pipeline {
     agent any
     environment {
         TF_VAR_localstack_endpoint = 'http://host.docker.internal:4566'
+        LOCALSTACK_AUTH_TOKEN = credentials('localstack-auth-token')
     }
     stages {
         stage('Start LocalStack') {
