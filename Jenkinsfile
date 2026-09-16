@@ -24,5 +24,15 @@ pipeline {
                 }
          }
         }
+        stage('Run on the cluster'){
+            steps{
+                sh 'docker cp localstack:/root/.kube/config ./kubeconfig'
+                sh "sed -i 's#https://0.0.0.0#https://host.docker.internal#' ./kubeconfig"
+                withCredentials([file(credentialsId: 'k8s-secret-yaml', variable: 'SECRET_FILE')]) {
+                    sh 'cp $SECRET_FILE k8s/secret.yaml'
+                }
+                sh 'kubectl --kubeconfig ./kubeconfig apply -f k8s/'
+            }
+        }
     }
 }
