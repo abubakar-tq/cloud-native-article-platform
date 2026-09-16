@@ -27,10 +27,10 @@ provider "aws" {
   s3_use_path_style = true
 
   endpoints {
-    s3  = "http://localhost:4566"
-    ec2 = "http://localhost:4566"
-    iam = "http://localhost:4566"
-    eks = "http://localhost:4566"
-    sts = "http://localhost:4566"
+    s3  = var.localstack_endpoint
+    ec2 = var.localstack_endpoint
+    iam = var.localstack_endpoint
+    eks = var.localstack_endpoint
+    sts = var.localstack_endpoint
   }
 }

@@ -57,3 +57,9 @@ variable "app_service_account" {
   type        = string
   default     = "app-sa"
 }
+
+variable "localstack_endpoint" {
+  description = "LocalStack endpoint URL - differs between running Terraform directly (WSL) vs. from inside a container (Jenkins)"
+  type        = string
+  default     = "http://localhost:4566"
+}
