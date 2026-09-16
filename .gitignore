@@ -45,6 +45,7 @@ infra/*.tfstate.*
 infra/*.tfvars
 !infra/terraform.tfvars.example
 infra/.terraform/
+infra/tfplan
 infra/crash.log
 infra/crash.*.log
 infra/ebs-csi-policy.json
