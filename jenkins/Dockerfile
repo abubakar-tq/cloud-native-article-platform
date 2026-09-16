@@ -35,11 +35,21 @@ RUN curl -fsSL -o docker.tgz https://download.docker.com/linux/static/stable/x86
     rm docker.tgz
 
 # ============================================================
+# Docker Compose plugin
+# ============================================================
+
+RUN mkdir -p /usr/local/lib/docker/cli-plugins && \
+    curl -fsSL -o /usr/local/lib/docker/cli-plugins/docker-compose \
+        https://github.com/docker/compose/releases/download/v2.29.7/docker-compose-linux-x86_64 && \
+    chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+# ============================================================
 # Verify
 # ============================================================
 
 RUN terraform version && \
     kubectl version --client && \
-    docker --version
+    docker --version && \
+    docker compose version
 
 USER jenkins
