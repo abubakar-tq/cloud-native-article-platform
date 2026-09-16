@@ -5,6 +5,7 @@ resource "aws_vpc" "main" {
 
   tags = {
     Name = "${var.project_name}-vpc"
+
     "kubernetes.io/cluster/${var.project_name}-eks-cluster" = "shared"
   }
 }
@@ -26,7 +27,9 @@ resource "aws_subnet" "public" {
 
   tags = {
     Name = "${var.project_name}-public-subnet-${count.index + 1}"
+
     "kubernetes.io/cluster/${var.project_name}-eks-cluster" = "shared"
+
     "kubernetes.io/role/elb" = "1"
   }
 }
@@ -39,8 +42,10 @@ resource "aws_subnet" "private" {
 
   tags = {
     Name = "${var.project_name}-private-subnet-${count.index + 1}"
+
     "kubernetes.io/cluster/${var.project_name}-eks-cluster" = "shared"
-    "kubernetes.io/role/internal-elb"                       = "1"
+
+    "kubernetes.io/role/internal-elb" = "1"
   }
 }
 
