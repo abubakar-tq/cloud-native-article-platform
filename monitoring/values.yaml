@@ -1,0 +1,56 @@
+# Values for kube-prometheus-stack on our LocalStack/k3d cluster.
+# Adapted from a real-AWS config: no cloud load balancer or EBS/gp3 storage
+# class exists here, so services stay ClusterIP (reach via kubectl
+# port-forward) and persistence uses k3d's default local-path StorageClass.
+
+namespaceOverride: monitoring
+
+# k3s bundles the control plane into a single binary rather than exposing
+# separate scrapeable endpoints for these, so there's nothing to collect here.
+kubeControllerManager:
+  enabled: false
+kubeScheduler:
+  enabled: false
+kubeEtcd:
+  enabled: false
+
+defaultRules:
+  create: true
+
+alertmanager:
+  enabled: false
+
+prometheus:
+  service:
+    type: ClusterIP
+  prometheusSpec:
+    retention: 2d
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 2Gi
+
+grafana:
+  # No adminPassword set here on purpose - the chart generates a random one
+  # and stores it in a Secret, rather than committing a password to git.
+  service:
+    type: ClusterIP
+  persistence:
+    enabled: true
+    accessModes:
+      - ReadWriteOnce
+    size: 1Gi
+  defaultDashboardsEnabled: true
+
+kubeStateMetrics:
+  enabled: true
+
+nodeExporter:
+  enabled: true
