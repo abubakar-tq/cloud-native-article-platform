@@ -24,10 +24,21 @@ pipeline {
                 }
          }
         }
-        stage('Run on the cluster'){
-            steps{
+        stage('Prepare Kubeconfig') {
+            steps {
                 sh 'docker cp localstack:/root/.kube/config ./kubeconfig'
                 sh "sed -i 's#https://0.0.0.0#https://kubernetes#' ./kubeconfig"
+            }
+        }
+        stage('Install Monitoring Stack') {
+            steps {
+                sh 'helm repo add prometheus-community https://prometheus-community.github.io/helm-charts --force-update'
+                sh 'helm repo update'
+                sh 'helm --kubeconfig ./kubeconfig upgrade --install monitoring prometheus-community/kube-prometheus-stack -f monitoring/values.yaml --create-namespace --namespace monitoring --wait --timeout 10m'
+            }
+        }
+        stage('Deploy App'){
+            steps{
                 withCredentials([file(credentialsId: 'k8s-secret-yaml', variable: 'SECRET_FILE')]) {
                     sh 'cp -f $SECRET_FILE k8s/02-secret.yaml'
                 }
