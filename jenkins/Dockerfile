@@ -44,13 +44,24 @@ RUN mkdir -p /usr/local/lib/docker/cli-plugins && \
     chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 
 # ============================================================
+# Helm
+# ============================================================
+
+RUN curl -fsSL -o helm.tar.gz https://get.helm.sh/helm-v4.3.0-linux-amd64.tar.gz && \
+    tar -xzf helm.tar.gz && \
+    mv linux-amd64/helm /usr/local/bin/helm && \
+    chmod +x /usr/local/bin/helm && \
+    rm -rf helm.tar.gz linux-amd64
+
+# ============================================================
 # Verify
 # ============================================================
 
 RUN terraform version && \
     kubectl version --client && \
     docker --version && \
-    docker compose version
+    docker compose version && \
+    helm version
 
 # ============================================================
 # Docker socket access for the jenkins user
