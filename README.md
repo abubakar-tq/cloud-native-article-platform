@@ -177,16 +177,19 @@ LocalStack's EKS emulation is real, not simulated: it creates an actual [k3d](ht
 
 ## Kubernetes manifests — `k8s/`
 
+Files are numbered so `kubectl apply -f k8s/` applies them in dependency order (namespace before anything namespaced to it, ServiceAccount before the Deployment that references it, etc.) — no separate ordering steps needed.
+
 | File | Purpose |
 |---|---|
-| `namespace.yaml` | The `article-platform` namespace everything else lives in |
-| `configmap.yaml` | Non-secret app configuration (DB host, S3 bucket name, LocalStack endpoint, etc.) |
-| `secret.yaml.example` | Template for the real `secret.yaml` (gitignored — contains actual DB password, session secret, etc.) |
-| `serviceaccount.yaml` | The app's ServiceAccount, annotated with the IRSA role ARN from Terraform's output, granting pods S3 access without static credentials |
-| `deployment.yaml` | The app itself, pulling its image from GHCR |
-| `app-service.yaml` | `NodePort` service exposing the app on port `30080` |
-| `postgres-statefulset.yaml` | Postgres, with a `PersistentVolumeClaim` (`volumeClaimTemplates`) for its data directory |
-| `postgres-service.yaml` | Headless `ClusterIP` service for Postgres |
+| `00-namespace.yaml` | The `article-platform` namespace everything else lives in |
+| `01-configmap.yaml` | Non-secret app configuration (DB host, S3 bucket name, LocalStack endpoint, etc.) |
+| `02-secret.yaml.example` | Template for the real `02-secret.yaml` (gitignored — contains actual DB password, session secret, etc.) |
+| `03-serviceaccount.yaml` | The app's ServiceAccount, annotated with the IRSA role ARN from Terraform's output, granting pods S3 access without static credentials |
+| `04-postgres-statefulset.yaml` | Postgres, with a `PersistentVolumeClaim` (`volumeClaimTemplates`) for its data directory |
+| `05-postgres-service.yaml` | Headless `ClusterIP` service for Postgres |
+| `06-deployment.yaml` | The app itself, pulling its image from GHCR |
+| `07-app-service.yaml` | `NodePort` service exposing the app on port `30080` |
+| `08-servicemonitor.yaml` | Tells Prometheus to scrape the app's `/metrics` endpoint |
 
 ## CI/CD
 
@@ -199,7 +202,7 @@ LocalStack's EKS emulation is real, not simulated: it creates an actual [k3d](ht
 1. **Start LocalStack** — `docker compose up -d localstack`
 2. **Wait for LocalStack** — polls `/_localstack/health` until ready
 3. **Provision Infrastructure** — `terraform init` / `plan -out=tfplan` / `apply` against LocalStack (`dir('infra')`)
-4. **Run on the cluster** — extracts the kubeconfig LocalStack's k3d cluster generated, patches its server address so it's reachable from inside the Jenkins container, injects the real `k8s/secret.yaml` from a Jenkins credential (never committed to git), and runs `kubectl apply -f k8s/`
+4. **Run on the cluster** — extracts the kubeconfig LocalStack's k3d cluster generated, patches its server address so it's reachable from inside the Jenkins container, injects the real `k8s/02-secret.yaml` from a Jenkins credential (never committed to git), and runs `kubectl apply -f k8s/`
 
 Two Jenkins credentials back this pipeline: `localstack-auth-token` (Secret text, LocalStack Pro auth) and `k8s-secret-yaml` (Secret file, the real Kubernetes Secret manifest).
 

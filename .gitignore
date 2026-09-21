@@ -29,7 +29,6 @@ SECRET_MANAGEMENT.md
 
 # Kubernetes secrets (keep sample only)
 k8s/02-secret.yaml
-k8s/secret.yaml
 githubLink.txt
 runningContainers02.png
 runningContainers01.png

@@ -29,9 +29,8 @@ pipeline {
                 sh 'docker cp localstack:/root/.kube/config ./kubeconfig'
                 sh "sed -i 's#https://0.0.0.0#https://kubernetes#' ./kubeconfig"
                 withCredentials([file(credentialsId: 'k8s-secret-yaml', variable: 'SECRET_FILE')]) {
-                    sh 'cp -f $SECRET_FILE k8s/secret.yaml'
+                    sh 'cp -f $SECRET_FILE k8s/02-secret.yaml'
                 }
-                sh 'kubectl --kubeconfig ./kubeconfig apply -f k8s/namespace.yaml'
                 sh 'kubectl --kubeconfig ./kubeconfig apply -f k8s/'
             }
         }
