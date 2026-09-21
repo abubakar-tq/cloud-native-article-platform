@@ -3,6 +3,7 @@ const express = require('express')
 const morgan = require('morgan')
 const session = require('express-session')
 const methodOverride = require('method-override')
+const client = require('prom-client')
 const articlesRouter = require('./routes/articles')
 const authRouter = require('./routes/auth')
 const { requireAuth, blockAdminFromUserRoutes } = require('./middleware/auth')
@@ -10,6 +11,16 @@ const { requireAuth, blockAdminFromUserRoutes } = require('./middleware/auth')
 const isProduction = process.env.NODE_ENV === 'production'
 const app = express()
 const sessionSecret = process.env.SESSION_SECRET || 'change-me'
+
+const metricsRegister = new client.Registry()
+client.collectDefaultMetrics({ register: metricsRegister })
+
+const httpRequestCounter = new client.Counter({
+    name: 'http_requests_total',
+    help: 'Total number of HTTP requests',
+    labelNames: ['method', 'route', 'status_code'],
+    registers: [metricsRegister]
+})
 
 // Configure session store for production
 let sessionStore
@@ -35,6 +46,16 @@ if (isProduction) {
 }
 
 app.disable('x-powered-by')
+app.use((req, res, next) => {
+    res.on('finish', () => {
+        httpRequestCounter.inc({
+            method: req.method,
+            route: req.route?.path || req.path,
+            status_code: res.statusCode
+        })
+    })
+    next()
+})
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(methodOverride('_method'))
@@ -93,6 +114,12 @@ app.set('view engine', 'ejs')
 // Health check endpoint
 app.get('/health', (req, res) => {
     res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString() })
+})
+
+// Prometheus metrics endpoint
+app.get('/metrics', async(req, res) => {
+    res.set('Content-Type', metricsRegister.contentType)
+    res.end(await metricsRegister.metrics())
 })
 
 app.get('/', blockAdminFromUserRoutes, (req, res) => {
